@@ -1,0 +1,45 @@
+---
+runmodes:
+  - runmode: workers
+
+nfqueue:
+  mode: accept
+  repeat-mark: 1
+  repeat-mask: 1
+  bypass-mark: 2
+  bypass-mask: 2
+  queue-balance:
+    - 0-3
+
+rule-files:
+  - /etc/suricata/rules/local.rules
+
+outputs:
+  - eve-log:
+    enabled: yes
+    filetype: regular
+    filename: eve.json
+    types:
+      - alert
+      - drop
+      - http
+      - dns
+
+classification-file: /etc/suricata/classification.config
+reference-config-file: /etc/suricata/reference.config
+
+app-layer:
+  protocols:
+    http: enabled
+    dns: enabled
+    tls: enabled
+
+
+logging:
+  outputs:
+    - console:
+      enabled: no
+    - file:
+      enabled: yes
+      level: info
+      filename: suricata.log
