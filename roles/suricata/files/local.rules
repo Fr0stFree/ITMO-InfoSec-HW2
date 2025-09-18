@@ -1,0 +1,5 @@
+# Блокируем все ICMP пакеты — базовый IPS-тест
+drop icmp any any -> any any (msg:"[IPS] BLOCK ICMP"; sid:1000007; rev:1;)
+
+# Логируем HTTP-запросы — базовый IDS-тест
+alert http any any -> any any (msg:"[IDS] HTTP Request Detected"; sid:100002; rev:1; flow:to_server; classtype:policy-violation;)

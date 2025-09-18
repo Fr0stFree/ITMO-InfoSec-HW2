@@ -1,3 +1,4 @@
+%YAML 1.1
 ---
 runmodes:
   - runmode: workers
@@ -38,8 +39,8 @@ app-layer:
 logging:
   outputs:
     - console:
-      enabled: no
-    - file:
       enabled: yes
-      level: info
-      filename: suricata.log
+    # - file:
+      # enabled: no
+      # level: info
+      # filename: /var/log/suricata/suricata.log

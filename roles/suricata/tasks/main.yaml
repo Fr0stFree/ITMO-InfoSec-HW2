@@ -10,3 +10,91 @@
   ansible.builtin.apt:
     name: "{{ item }}"
     state: present
+
+- name: Ensure br_netfilter is loaded on boot
+  ansible.builtin.copy:
+    dest: /etc/modules-load.d/br_netfilter.conf
+    content: |
+      br_netfilter
+
+- name: Load br_netfilter module
+  ansible.builtin.modprobe:
+    name: br_netfilter
+    state: present
+
+- name: Set sysctl parameters for bridge network filtering
+  ansible.builtin.copy:
+    dest: /etc/sysctl.d/99-bridge-nf.conf
+    content: |
+      net.bridge.bridge-nf-call-iptables=1
+      net.bridge.bridge-nf-call-ip6tables=1
+
+- name: Apply sysctl parameters
+  ansible.builtin.command: sysctl --system
+
+- name: Install Suricata
+  ansible.builtin.apt:
+    name: suricata
+    state: latest
+    update_cache: yes
+
+- name: Copy Suricata rules
+  ansible.builtin.copy:
+    src: local.rules
+    dest: /etc/suricata/rules/local.rules
+    owner: "{{ username }}"
+    mode: "0644"
+  
+- name: Copy Suricata configuration
+  ansible.builtin.copy:
+    src: config.yaml
+    dest: /etc/suricata/suricata.yaml
+    owner: "{{ username }}"
+    mode: "0644"
+  
+- name: Remove existing iptables rule to avoid duplicates
+  ansible.builtin.shell: iptables -D DOCKER-USER -j NFQUEUE --queue-num 1 --queue-bypass 2>/dev/null || true
+
+- name: Insert iptables rule to forward packets to NFQUEUE
+  ansible.builtin.shell: iptables -I DOCKER-USER -j NFQUEUE --queue-num 1 --queue-bypass
+
+- name: Apply iptables rules persistently
+  ansible.builtin.command: netfilter-persistent save
+
+- name: Ensure suricata has required capabilities
+  community.general.capabilities:
+    path: /usr/bin/suricata
+    capability: cap_net_admin,cap_net_raw+ep
+    state: present
+
+- name: Ensure directory for suricata.service exists
+  ansible.builtin.file:
+    path: /etc/systemd/system/suricata.service.d
+    state: directory
+    owner: "{{ username }}"
+    mode: "0755"
+
+- name: Create override file for suricata service
+  ansible.builtin.copy:
+    src: service.d
+    dest: /etc/systemd/system/suricata.service.d/override.conf
+    owner: "{{ username }}"
+    mode: "0644"
+
+- name: Reload systemd to apply changes
+  ansible.builtin.command: systemctl daemon-reload
+
+- name: Run and enable Suricata service
+  ansible.builtin.systemd:
+    name: suricata
+    state: started
+    enabled: yes
+
+- name: Verify Suricata is running
+  ansible.builtin.shell: systemctl status suricata --no-pager
+  register: suricata_status
+  changed_when: false
+
+- name: Display Suricata status
+  ansible.builtin.debug:
+    var: suricata_status.stdout_lines

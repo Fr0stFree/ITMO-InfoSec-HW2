@@ -2,7 +2,7 @@
 - hosts: all
   become: true
   roles:
-    - docker
+    # - docker
     - suricata
   vars:
     username: vagrant
