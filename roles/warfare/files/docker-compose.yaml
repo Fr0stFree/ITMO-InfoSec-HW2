@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  victim:
+    image: alpine:latest
+    container_name: victim
+    networks:
+      - warfare_network
+    command: >
+      sh -c "apk add --no-cache curl python3 py3-pip iputils && python3 -m http.server 80"
+    tty: true
+
+  attacker:
+    image: kalilinux/kali-rolling:latest
+    container_name: attacker
+    networks: 
+      - warfare_network
+    command: >
+      sh -c "apt-get update && apt-get install -y iputils-ping curl && bash"
+    stdin_open: true
+    tty: true
+
+networks:
+  warfare_network:
+    driver: bridge

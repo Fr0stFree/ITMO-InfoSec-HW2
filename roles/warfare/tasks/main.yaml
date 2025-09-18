@@ -1,0 +1,10 @@
+---
+- name: Copy docker-compose file
+  ansible.builtin.copy:
+    src: docker-compose.yaml
+    dest: /home/{{ username }}/docker-compose.yaml
+    owner: "{{ username }}"
+    mode: "0644"
+
+- name: Run containers
+  ansible.builtin.command: docker compose -f /home/{{ username }}/docker-compose.yaml up -d

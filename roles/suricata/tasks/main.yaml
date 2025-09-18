@@ -1,4 +1,17 @@
 ---
+- name: Create service group
+  ansible.builtin.group:
+    name: "{{ group }}"
+    state: present
+    system: yes
+
+- name: Create service user
+  ansible.builtin.user:
+    name: "{{ user }}"
+    state: present
+    create_home: yes
+    shell: /bin/bash
+
 - name: Install required packages
   loop: 
     - software-properties-common
@@ -42,14 +55,14 @@
   ansible.builtin.copy:
     src: local.rules
     dest: /etc/suricata/rules/local.rules
-    owner: "{{ username }}"
+    owner: "{{ user }}"
     mode: "0644"
   
 - name: Copy Suricata configuration
   ansible.builtin.copy:
     src: config.yaml
     dest: /etc/suricata/suricata.yaml
-    owner: "{{ username }}"
+    owner: "{{ user }}"
     mode: "0644"
   
 - name: Remove existing iptables rule to avoid duplicates
@@ -71,14 +84,14 @@
   ansible.builtin.file:
     path: /etc/systemd/system/suricata.service.d
     state: directory
-    owner: "{{ username }}"
+    owner: "{{ user }}"
     mode: "0755"
 
 - name: Create override file for suricata service
   ansible.builtin.copy:
     src: service.d
     dest: /etc/systemd/system/suricata.service.d/override.conf
-    owner: "{{ username }}"
+    owner: "{{ user }}"
     mode: "0644"
 
 - name: Reload systemd to apply changes
