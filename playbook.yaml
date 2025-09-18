@@ -1,5 +1,5 @@
 ---
-- hosts: all
+- hosts: suricata-lab
   become: true
   roles:
     - docker

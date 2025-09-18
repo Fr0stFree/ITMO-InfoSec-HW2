@@ -24,16 +24,14 @@
     name: "{{ item }}"
     state: present
 
-- name: Ensure br_netfilter is loaded on boot
+- name: Run modprobe for br_netfilter
+  ansible.builtin.shell: modprobe br_netfilter
+
+- name: Set br_netfilter
   ansible.builtin.copy:
     dest: /etc/modules-load.d/br_netfilter.conf
     content: |
       br_netfilter
-
-- name: Load br_netfilter module
-  ansible.builtin.modprobe:
-    name: br_netfilter
-    state: present
 
 - name: Set sysctl parameters for bridge network filtering
   ansible.builtin.copy:
@@ -43,7 +41,7 @@
       net.bridge.bridge-nf-call-ip6tables=1
 
 - name: Apply sysctl parameters
-  ansible.builtin.command: sysctl --system
+  ansible.builtin.command: sysctl -p /etc/sysctl.d/99-bridge-nf.conf
 
 - name: Install Suricata
   ansible.builtin.apt:
@@ -53,12 +51,14 @@
 
 - name: Copy Suricata rules
   ansible.builtin.copy:
-    src: local.rules
     dest: /etc/suricata/rules/local.rules
     owner: "{{ user }}"
     mode: "0644"
+    content: |
+      drop icmp any any -> any any (msg:"[IPS] BLOCK ICMP"; sid:1000007; rev:1;)
+      alert http any any -> any any (msg:"[IDS] HTTP Request Detected"; sid:100002; rev:1; flow:to_server; classtype:policy-violation;)
   
-- name: Copy Suricata configuration
+- name: Set Suricata configuration
   ansible.builtin.copy:
     src: config.yaml
     dest: /etc/suricata/suricata.yaml
@@ -89,10 +89,14 @@
 
 - name: Create override file for suricata service
   ansible.builtin.copy:
-    src: service.d
     dest: /etc/systemd/system/suricata.service.d/override.conf
     owner: "{{ user }}"
     mode: "0644"
+    content: |
+      [Service]
+      Type=simple
+      ExecStart=
+      ExecStart=/usr/bin/suricata -c /etc/suricata/suricata.yaml -q 1 --pidfile /run/suricata.pid -i eth0 -D
 
 - name: Reload systemd to apply changes
   ansible.builtin.command: systemctl daemon-reload

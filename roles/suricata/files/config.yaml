@@ -35,12 +35,11 @@ app-layer:
     dns: enabled
     tls: enabled
 
-
 logging:
   outputs:
     - console:
-      enabled: yes
+      enabled: no
     # - file:
-      # enabled: no
-      # level: info
-      # filename: /var/log/suricata/suricata.log
+    #   enabled: yes
+    #   level: info
+    #   filename: /var/log/suricata/suricata.log
