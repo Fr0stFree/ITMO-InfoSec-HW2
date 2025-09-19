@@ -1,17 +1,4 @@
 ---
-- name: Create service group
-  ansible.builtin.group:
-    name: "{{ group }}"
-    state: present
-    system: yes
-
-- name: Create service user
-  ansible.builtin.user:
-    name: "{{ user }}"
-    state: present
-    create_home: yes
-    shell: /bin/bash
-
 - name: Install required packages
   loop: 
     - software-properties-common
@@ -52,7 +39,6 @@
 - name: Copy Suricata rules
   ansible.builtin.copy:
     dest: /etc/suricata/rules/local.rules
-    owner: "{{ user }}"
     mode: "0644"
     content: |
       drop icmp any any -> any any (msg:"[IPS] BLOCK ICMP"; sid:1000007; rev:1;)
@@ -62,14 +48,13 @@
   ansible.builtin.copy:
     src: config.yaml
     dest: /etc/suricata/suricata.yaml
-    owner: "{{ user }}"
     mode: "0644"
   
 - name: Remove existing iptables rule to avoid duplicates
-  ansible.builtin.shell: iptables -D DOCKER-USER -j NFQUEUE --queue-num 1 --queue-bypass 2>/dev/null || true
+  ansible.builtin.shell: iptables -D DOCKER-USER -j NFQUEUE --queue-num 0 --queue-bypass 2>/dev/null || true
 
 - name: Insert iptables rule to forward packets to NFQUEUE
-  ansible.builtin.shell: iptables -I DOCKER-USER -j NFQUEUE --queue-num 1 --queue-bypass
+  ansible.builtin.shell: iptables -I DOCKER-USER -j NFQUEUE --queue-num 0 --queue-bypass
 
 - name: Apply iptables rules persistently
   ansible.builtin.command: netfilter-persistent save
@@ -84,19 +69,16 @@
   ansible.builtin.file:
     path: /etc/systemd/system/suricata.service.d
     state: directory
-    owner: "{{ user }}"
     mode: "0755"
 
 - name: Create override file for suricata service
   ansible.builtin.copy:
     dest: /etc/systemd/system/suricata.service.d/override.conf
-    owner: "{{ user }}"
     mode: "0644"
     content: |
       [Service]
-      Type=simple
       ExecStart=
-      ExecStart=/usr/bin/suricata -c /etc/suricata/suricata.yaml -q 1 --pidfile /run/suricata.pid -i eth0 -D
+      ExecStart=/usr/bin/suricata -c /etc/suricata/suricata.yaml -q 0 --pidfile /run/suricata.pid -D
 
 - name: Reload systemd to apply changes
   ansible.builtin.command: systemctl daemon-reload
@@ -104,7 +86,7 @@
 - name: Run and enable Suricata service
   ansible.builtin.systemd:
     name: suricata
-    state: started
+    state: restarted
     enabled: yes
 
 - name: Verify Suricata is running

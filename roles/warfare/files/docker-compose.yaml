@@ -2,17 +2,17 @@ version: '3.8'
 
 services:
   victim:
-    image: alpine:latest
+    image: python:3.9-alpine
     container_name: victim
     networks:
       - warfare_network
-    command: >
-      sh -c "apk add --no-cache curl python3 py3-pip iputils && python3 -m http.server 80"
-    tty: true
+    restart: unless-stopped
+    command: python3 -m http.server 80
 
   attacker:
     image: kalilinux/kali-rolling:latest
     container_name: attacker
+    restart: unless-stopped
     networks: 
       - warfare_network
     command: >
