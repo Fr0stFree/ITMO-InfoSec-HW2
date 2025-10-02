@@ -4,6 +4,7 @@
   roles:
     - docker
     - suricata
+    - evebox
     - warfare
   vars:
     username: vagrant

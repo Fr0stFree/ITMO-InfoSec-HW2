@@ -1,0 +1,20 @@
+---
+- name: Ensure EveBox is running
+  community.docker.docker_container:
+    name: evebox
+    image: jasonish/evebox:latest
+    state: started
+    restart_policy: unless-stopped
+    ports:
+      - "5636:5636"
+    volumes:
+      - /var/log/suricata:/var/log/suricata:ro
+    command: >
+      evebox server
+      --host 0.0.0.0
+      --port 5636
+      --sqlite
+      --input /var/log/suricata/eve.json
+      --end
+      --no-auth
+      --no-tls

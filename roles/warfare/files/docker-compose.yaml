@@ -20,15 +20,6 @@ services:
     stdin_open: true
     tty: true
 
-  evebox:
-    image: jasonish/evebox:latest
-    container_name: evebox
-    restart: unless-stopped
-    ports:
-      - "5636:5636"
-    volumes:
-      - /var/log/suricata:/var/log/suricata:ro
-
 networks:
   warfare_network:
     driver: bridge
