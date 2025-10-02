@@ -16,9 +16,18 @@ services:
     networks: 
       - warfare_network
     command: >
-      sh -c "apt-get update && apt-get install -y iputils-ping curl && bash"
+      sh -c "apt-get update && apt-get install -y iputils-ping curl nmap && bash"
     stdin_open: true
     tty: true
+
+  evebox:
+    image: jasonish/evebox:latest
+    container_name: evebox
+    restart: unless-stopped
+    ports:
+      - "5636:5636"
+    volumes:
+      - /var/log/suricata:/var/log/suricata:ro
 
 networks:
   warfare_network:
