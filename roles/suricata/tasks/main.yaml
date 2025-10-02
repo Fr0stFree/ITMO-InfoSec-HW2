@@ -40,10 +40,8 @@
   ansible.builtin.copy:
     dest: /etc/suricata/rules/local.rules
     mode: "0644"
-    content: |
-      drop icmp any any -> any any (msg:"[IPS] BLOCK ICMP"; sid:1000007; rev:1;)
-      alert http any any -> any any (msg:"[IDS] HTTP Request Detected"; sid:100002; rev:1; flow:to_server; classtype:policy-violation;)
-  
+    src: local.rules
+
 - name: Set Suricata configuration
   ansible.builtin.copy:
     src: config.yaml
