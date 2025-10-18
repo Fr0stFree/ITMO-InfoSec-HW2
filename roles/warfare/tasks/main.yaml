@@ -5,7 +5,7 @@
     dest: /home/{{ username }}/{{ item }}
     owner: "{{ username }}"
     mode: "0644"
-  loop: [ "Dockerfile.attacker" , "Dockerfile.victim" , "docker-compose.yaml" ]
+  loop: "{{ dockerfiles }}"
 
 - name: Run containers
   community.docker.docker_compose_v2:
@@ -17,3 +17,17 @@
 - name: Show results
   ansible.builtin.debug:
     var: output
+
+# Apache ActiveMQ RCE (CVE-2023-46604)
+- name: Copy PoC files to host
+  ansible.builtin.copy:
+    src: active_mq/{{ item }}
+    dest: /tmp/{{ item }}
+  loop: "{{ active_mq.files }}"
+
+- name: Copy PoC files into victim container
+  community.docker.docker_container_copy_into:
+    container: attacker
+    path: /tmp/{{ item }}
+    container_path: "/opt/{{ item }}"
+  loop: "{{ active_mq.files }}"

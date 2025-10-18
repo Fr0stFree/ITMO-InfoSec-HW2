@@ -1,26 +1,32 @@
-version: '3.8'
+version: "3.8"
+
+networks:
+  vulnnet:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
 
 services:
-  victim:
-    build:
-      context: .
-      dockerfile: Dockerfile.victim
-    container_name: victim
-    networks:
-      - warfare_network
-    restart: unless-stopped
-
   attacker:
     build:
       context: .
       dockerfile: Dockerfile.attacker
     container_name: attacker
     restart: unless-stopped
-    networks: 
-      - warfare_network
+    networks:
+      vulnnet:
+        ipv4_address: 172.20.0.10
     stdin_open: true
     tty: true
 
-networks:
-  warfare_network:
-    driver: bridge
+  victim-activemq:
+    image: vulhub/activemq:5.16.5
+    container_name: victim-activemq
+    hostname: victim-activemq
+    networks:
+      vulnnet:
+        ipv4_address: 172.20.0.101
+    ports:
+      - "61616:61616"
+      - "8161:8161"

@@ -1,0 +1,8 @@
+dockerfiles:
+  - Dockerfile.attacker
+  - docker-compose.yaml
+
+active_mq:
+  files:
+    - poc.py
+    - poc.xml
