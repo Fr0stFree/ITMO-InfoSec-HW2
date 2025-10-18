@@ -1,10 +1,19 @@
 ---
-- name: Copy docker-compose file
+- name: Copy dockerfiles
   ansible.builtin.copy:
-    src: docker-compose.yaml
-    dest: /home/{{ username }}/docker-compose.yaml
+    src: "{{ item }}"
+    dest: /home/{{ username }}/{{ item }}
     owner: "{{ username }}"
     mode: "0644"
+  loop: [ "Dockerfile.attacker" , "Dockerfile.victim" , "docker-compose.yaml" ]
 
 - name: Run containers
-  ansible.builtin.command: docker compose -f /home/{{ username }}/docker-compose.yaml up -d
+  community.docker.docker_compose_v2:
+    project_name: warfare
+    project_src: /home/{{ username }}
+    state: present
+  register: output
+
+- name: Show results
+  ansible.builtin.debug:
+    var: output

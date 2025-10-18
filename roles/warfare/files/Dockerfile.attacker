@@ -1,0 +1,15 @@
+FROM kalilinux/kali-rolling:latest
+
+RUN apt-get update && apt-get install -y \
+    nmap \
+    hydra \
+    iputils-ping \
+    curl \
+    wget \
+    git 
+
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /root
+
+CMD ["/bin/bash"]

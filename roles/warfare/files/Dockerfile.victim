@@ -1,0 +1,11 @@
+FROM python:3.9-alpine
+
+RUN apk add --no-cache \
+    bash \
+    curl \
+    wget \
+    git
+
+WORKDIR /root
+
+CMD ["python3", "-m", "http.server", "80"]

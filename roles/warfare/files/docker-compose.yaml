@@ -2,21 +2,22 @@ version: '3.8'
 
 services:
   victim:
-    image: python:3.9-alpine
+    build:
+      context: .
+      dockerfile: Dockerfile.victim
     container_name: victim
     networks:
       - warfare_network
     restart: unless-stopped
-    command: python3 -m http.server 80
 
   attacker:
-    image: kalilinux/kali-rolling:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.attacker
     container_name: attacker
     restart: unless-stopped
     networks: 
       - warfare_network
-    command: >
-      sh -c "apt-get update && apt-get install -y iputils-ping curl nmap && bash"
     stdin_open: true
     tty: true
 
