@@ -7,6 +7,8 @@ Vagrant.configure("2") do |config|
 
   config.disksize.size = "35GB"
 
+  config.vm.synced_folder "./suricata-rules", "/vagrant/suricata-rules", owner: "root", group: "root"
+
   config.vm.provider "virtualbox" do |vb|
     vb.name = "suricata-lab"
     vb.memory = "4096"

