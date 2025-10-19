@@ -21,7 +21,7 @@ services:
     tty: true
 
   victim-activemq:
-    image: vulhub/activemq:5.16.5
+    image: spmd/activemq:5.16.5
     container_name: victim-activemq
     hostname: victim-activemq
     networks:
