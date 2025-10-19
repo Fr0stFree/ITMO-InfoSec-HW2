@@ -30,3 +30,14 @@ services:
     ports:
       - "61616:61616"
       - "8161:8161"
+
+  victim-redis:
+    image: redis:5.0.7
+    container_name: victim-redis
+    hostname: victim-redis
+    networks:
+      vulnnet:
+        ipv4_address: 172.20.0.102
+    ports:
+      - "6379:6379"
+    command: redis-server --bind 0.0.0.0 --protected-mode no --save ""

