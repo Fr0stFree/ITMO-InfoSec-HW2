@@ -7,6 +7,11 @@ networks:
       config:
         - subnet: 172.20.0.0/16
 
+volumes:
+  minio_data1:
+  minio_data2:
+  minio_data3:
+
 services:
   attacker:
     build:
@@ -41,3 +46,96 @@ services:
     ports:
       - "6379:6379"
     command: redis-server --bind 0.0.0.0 --protected-mode no --save ""
+
+  victim-minio-node1:
+    image: minio/minio:RELEASE.2023-02-27T18-10-45Z
+    container_name: victim-minio-node1
+    hostname: victim-minio-node1
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin-vulhub
+    networks:
+      vulnnet:
+        ipv4_address: 172.20.0.103
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    command:
+      - minio
+      - server
+      - --console-address
+      - :9001
+      - http://victim-minio-node1:9000/mnt/data1
+      - http://victim-minio-node2:9000/mnt/data2
+      - http://victim-minio-node3:9000/mnt/data3
+    volumes:
+      - minio_data1:/mnt/data1
+
+  victim-minio-node2:
+    image: minio/minio:RELEASE.2023-02-27T18-10-45Z
+    container_name: victim-minio-node2
+    hostname: victim-minio-node2
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin-vulhub
+    networks:
+      vulnnet:
+        ipv4_address: 172.20.0.113
+    command:
+      - minio
+      - server
+      - http://victim-minio-node1:9000/mnt/data1
+      - http://victim-minio-node2:9000/mnt/data2
+      - http://victim-minio-node3:9000/mnt/data3
+    volumes:
+      - minio_data2:/mnt/data2
+
+  victim-minio-node3:
+    image: minio/minio:RELEASE.2023-02-27T18-10-45Z
+    container_name: victim-minio-node3
+    hostname: victim-minio-node3
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin-vulhub
+    networks:
+      vulnnet:
+        ipv4_address: 172.20.0.114
+    command:
+      - minio
+      - server
+      - http://victim-minio-node1:9000/mnt/data1
+      - http://victim-minio-node2:9000/mnt/data2
+      - http://victim-minio-node3:9000/mnt/data3
+    volumes:
+      - minio_data3:/mnt/data3
+
+  # does not work on arm64
+  # victim-samba:
+  #   image: vulhub/samba:4.6.3
+  #   container_name: victim-samba
+  #   hostname: victim-samba
+  #   networks:
+  #     vulnnet:
+  #       ipv4_address: 172.20.0.104
+  #   ports:
+  #   - "445:445"
+  #   - "6699:6699"
+  #   volumes:
+  #   - ./smb.conf:/usr/local/samba/etc/smb.conf
+  #   tty: true
+
+  # Does not work. Why?
+  # victim-jenkins:
+  #   image: jenkins/jenkins:2.441
+  #   container_name: victim-jenkins
+  #   hostname: victim-jenkins
+  #   networks:
+  #     vulnnet:
+  #       ipv4_address: 172.20.0.105
+  #   ports:
+  #     - "8080:8080"
+  #     - "50000:50000"
+  #     - "5005:5005"
+  #   init: true
+  #   environment:
+  #     - DEBUG=1
