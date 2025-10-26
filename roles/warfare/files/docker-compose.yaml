@@ -109,33 +109,31 @@ services:
     volumes:
       - minio_data3:/mnt/data3
 
-  # does not work on arm64
-  # victim-samba:
-  #   image: vulhub/samba:4.6.3
-  #   container_name: victim-samba
-  #   hostname: victim-samba
-  #   networks:
-  #     vulnnet:
-  #       ipv4_address: 172.20.0.104
-  #   ports:
-  #   - "445:445"
-  #   - "6699:6699"
-  #   volumes:
-  #   - ./smb.conf:/usr/local/samba/etc/smb.conf
-  #   tty: true
+  victim-samba:
+    image: vulhub/samba:4.6.3
+    container_name: victim-samba
+    hostname: victim-samba
+    networks:
+      vulnnet:
+        ipv4_address: 172.20.0.104
+    ports:
+    - "445:445"
+    - "6699:6699"
+    volumes:
+    - ./smb.conf:/usr/local/samba/etc/smb.conf
+    tty: true
 
-  # Does not work. Why?
-  # victim-jenkins:
-  #   image: jenkins/jenkins:2.441
-  #   container_name: victim-jenkins
-  #   hostname: victim-jenkins
-  #   networks:
-  #     vulnnet:
-  #       ipv4_address: 172.20.0.105
-  #   ports:
-  #     - "8080:8080"
-  #     - "50000:50000"
-  #     - "5005:5005"
-  #   init: true
-  #   environment:
-  #     - DEBUG=1
+  victim-jenkins:
+    image: vulhub/jenkins:2.441
+    container_name: victim-jenkins
+    hostname: victim-jenkins
+    networks:
+      vulnnet:
+        ipv4_address: 172.20.0.105
+    ports:
+    - "8080:8080"
+    - "50000:50000"
+    - "5005:5005"
+    init: true
+    environment:
+    - DEBUG=1
