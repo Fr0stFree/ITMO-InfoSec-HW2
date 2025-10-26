@@ -86,3 +86,38 @@ alert smb any any -> any 445 (msg:"[IDS] SMB Multiple File Operations"; flow:to_
 
 # Операции внутри конкретной шары myshare (триггер при доступе/операциях в шаре)
 alert smb any any -> any 445 (msg:"[IDS] SMB Access/Write to myshare"; flow:to_server,established; smb.share; content:"myshare"; endswith; classtype:policy-violation; sid:3000306; rev:1;)
+
+# Jenkins
+
+# Обнаружение доступа к Jenkins
+alert http any any -> any 8080 (msg:"[IDS] Jenkins Web Interface Access"; flow:to_server,established; http.uri; content:"/"; threshold: type limit, track by_src, count 1, seconds 300; classtype:policy-violation; sid:3000501; rev:2;)
+
+# Обнаружение загрузки jenkins-cli.jar
+alert http any any -> any 8080 (msg:"[IDS] Jenkins CLI JAR Download"; flow:to_server,established; http.uri; content:"jenkins-cli.jar"; nocase; classtype:attempted-recon; sid:3000502; rev:2;)
+
+# Обнаружение Jenkins CLI операций (по User-Agent)
+alert http any any -> any 8080 (msg:"[IDS] Jenkins CLI Command Execution"; flow:to_server,established; http.user_agent; content:"Jenkins CLI"; nocase; classtype:attempted-admin; sid:3000503; rev:2;)
+
+# Блокировка CVE-2024-23897 эксплуатации (символ @ в запросах)
+drop http any any -> any 8080 (msg:"[IPS] Jenkins CVE-2024-23897 File Read Blocked"; flow:to_server,established; http.request_body; content:"@/"; threshold: type limit, track by_src, count 1, seconds 3600; classtype:attempted-admin; sid:3000504; rev:2;)
+
+# Обнаружение попыток чтения системных файлов
+alert http any any -> any 8080 (msg:"[IDS] Jenkins System File Access"; flow:to_server,established; http.request_body; pcre:"/@\/(etc|proc|var)\//"; classtype:attempted-admin; sid:3000505; rev:2;)
+
+# Обнаружение попыток чтения секретов Jenkins
+alert http any any -> any 8080 (msg:"[IDS] Jenkins Secret File Access"; flow:to_server,established; http.request_body; content:"@/var/jenkins_home/secret"; nocase; classtype:attempted-admin; sid:3000506; rev:2;)
+
+# Обнаружение множественных Jenkins CLI операций
+alert http any any -> any 8080 (msg:"[IDS] Jenkins CLI Multiple Operations"; flow:to_server,established; http.uri; content:"/cli"; threshold: type threshold, track by_src, count 10, seconds 60; classtype:attempted-recon; sid:3000507; rev:2;)
+
+# Обнаружение доступа к JNLP порту (50000)
+alert tcp any any -> any 50000 (msg:"[IDS] Jenkins JNLP Port Access"; flow:to_server,established; threshold: type limit, track by_src, count 1, seconds 300; classtype:policy-violation; sid:3000508; rev:2;)
+
+# Обнаружение доступа к debug порту (5005)
+alert tcp any any -> any 5005 (msg:"[IDS] Jenkins Debug Port Access"; flow:to_server,established; threshold: type limit, track by_src, count 1, seconds 300; classtype:attempted-admin; sid:3000509; rev:2;)
+
+# Обнаружение HTTP POST к CLI endpoint
+alert http any any -> any 8080 (msg:"[IDS] Jenkins CLI HTTP POST"; flow:to_server,established; http.method; content:"POST"; http.uri; content:"/cli"; classtype:attempted-admin; sid:3000510; rev:2;)
+
+# Блокировка агрессивного сканирования Jenkins
+drop http any any -> any 8080 (msg:"[IPS] Jenkins Aggressive Scanning Blocked"; flow:to_server,established; threshold: type both, track by_src, count 50, seconds 120; classtype:attempted-dos; sid:3000511; rev:2;)
