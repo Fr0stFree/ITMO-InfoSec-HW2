@@ -7,6 +7,13 @@
     mode: "0644"
   loop: "{{ dockerfiles }}"
 
+- name: Copy Samba configuration file
+  ansible.builtin.copy:
+    src: samba/smb.conf
+    dest: /home/{{ username }}/smb.conf
+    owner: "{{ username }}"
+    mode: "0644"
+
 - name: Run containers
   community.docker.docker_compose_v2:
     project_name: warfare
