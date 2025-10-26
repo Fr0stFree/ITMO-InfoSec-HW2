@@ -30,11 +30,26 @@
 - name: Apply sysctl parameters
   ansible.builtin.command: sysctl -p /etc/sysctl.d/99-bridge-nf.conf
 
+- name: Add OISF Suricata stable repository
+  apt_repository:
+    repo: "ppa:oisf/suricata-stable"
+    state: present
+
+- name: Update package cache after adding repository
+  apt:
+    update_cache: yes
+
 - name: Install Suricata
   ansible.builtin.apt:
     name: suricata
     state: latest
     update_cache: yes
+
+- name: Create Suricata rules directory
+  ansible.builtin.file:
+    path: /etc/suricata/rules
+    state: directory
+    mode: "0755"
 
 - name: Copy Suricata rules
   ansible.builtin.copy:

@@ -1,5 +1,22 @@
 # Help
 
+
+## Yandex Cloud
+
+### Create VM
+```bash
+yc compute instance create \
+  --name warfare-vm \
+  --public-ip \
+  --zone ru-central1-a \
+  --hostname warfare-vm \
+  --cores 2 \
+  --memory 2GB \
+  --create-boot-disk image-id=fd84n8eontaojc77hp0u,size=40GB,image-folder-id=standard-images \
+  --ssh-key ~/.ssh/id_rsa.pub \
+  --core-fraction 50
+```
+
 ## General
 
 ### Resize vagrant disk
