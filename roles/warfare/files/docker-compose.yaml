@@ -125,17 +125,17 @@ services:
   #   tty: true
 
   # Does not work. Why?
-  victim-jenkins:
-    image: jenkins/jenkins:2.441
-    container_name: victim-jenkins
-    hostname: victim-jenkins
-    networks:
-      vulnnet:
-        ipv4_address: 172.20.0.105
-    ports:
-      - "8080:8080"
-      - "50000:50000"
-      - "5005:5005"
-    init: true
-    environment:
-      - DEBUG=1
+  # victim-jenkins:
+  #   image: jenkins/jenkins:2.441
+  #   container_name: victim-jenkins
+  #   hostname: victim-jenkins
+  #   networks:
+  #     vulnnet:
+  #       ipv4_address: 172.20.0.105
+  #   ports:
+  #     - "8080:8080"
+  #     - "50000:50000"
+  #     - "5005:5005"
+  #   init: true
+  #   environment:
+  #     - DEBUG=1
