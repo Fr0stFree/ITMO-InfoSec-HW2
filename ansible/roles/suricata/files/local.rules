@@ -40,6 +40,7 @@ alert tcp any any -> any 6379 (msg:"[IDS] Redis FLUSHALL Command Detected"; flow
 
 # Обнаружение большого количества операций (возможный брутфорс/скан)
 alert tcp any any -> any 6379 (msg:"[IDS] Redis Multiple Operations Detected"; flow:to_server,established; threshold:type limit,track by_src,count 20,seconds 60; classtype:attempted-recon; sid:3000108; rev:1;)
+
 # MinIO
 
 # Обнаружение CVE-2023-28432 Bootstrap Verify запроса
@@ -65,3 +66,23 @@ alert http any any -> any 9001 (msg:"[IDS] MinIO Console Access Detected"; flow:
 
 # Блокировка множественных S3 операций
 drop http any any -> any 9000 (msg:"[IPS] MinIO Excessive S3 Operations Blocked"; flow:to_server,established; threshold: type both, track by_src, count 50, seconds 60; classtype:attempted-dos; sid:3000208; rev:1;)
+
+# SambaCry
+
+# SMB соединения
+alert smb any any -> any 445 (msg:"[IDS] SMB Connection Detected"; flow:to_server,established; threshold: type limit, track by_src, count 1, seconds 300; classtype:policy-violation; sid:3000301; rev:1;)
+
+# Загрузка .so через SMB (попытка записи библиотек)
+alert smb any any -> any 445 (msg:"[IDS] SMB Shared Library Upload"; flow:to_server,established; file.name; content:".so"; endswith; classtype:trojan-activity; sid:3000302; rev:1;)
+
+# Блокировка известных артефактов SambaCry (имя библиотеки по умолчанию)
+drop smb any any -> any 445 (msg:"[IPS] SambaCry Library Upload Blocked"; flow:to_server,established; file.name; content:"libbindshell-samba.so"; endswith; threshold: type limit, track by_src, count 1, seconds 3600; classtype:attempted-admin; sid:3000303; rev:1;)
+
+# Подключение к bind shell на 6699
+alert tcp any any -> any 6699 (msg:"[IDS] SambaCry Bind Shell Connection"; flow:to_server,established; threshold: type limit, track by_src, count 1, seconds 60; classtype:trojan-activity; sid:3000304; rev:1;)
+
+# Множественные SMB операции (возможная эксплуатация/брут/скан)
+alert smb any any -> any 445 (msg:"[IDS] SMB Multiple File Operations"; flow:to_server,established; threshold: type threshold, track by_src, count 15, seconds 30; classtype:attempted-recon; sid:3000305; rev:1;)
+
+# Операции внутри конкретной шары myshare (триггер при доступе/операциях в шаре)
+alert smb any any -> any 445 (msg:"[IDS] SMB Access/Write to myshare"; flow:to_server,established; smb.share; content:"myshare"; endswith; classtype:policy-violation; sid:3000306; rev:1;)

@@ -1,0 +1,15 @@
+---
+- hosts: suricata-lab
+  become: true
+  tasks:
+    - name: Copy Suricata rules
+      ansible.builtin.copy:
+        dest: /etc/suricata/rules/local.rules
+        mode: "0644"
+        src: ../roles/suricata/files/local.rules
+
+    - name: Restart Suricata
+      service:
+        name: suricata
+        state: restarted
+
