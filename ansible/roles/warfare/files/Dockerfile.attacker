@@ -8,28 +8,10 @@ RUN apt-get install -y \
     iputils-ping \
     curl \
     wget \
-    jq 
-
-RUN apt-get install -y \
-    telnet \
-    smbclient \
-    redis-tools \
+    jq \
     python3 \
     python3-pip \
-    python3-venv \
-    netcat-traditional \
-    metasploit-framework \
-    python2.7 \
-    python2.7-dev
-
-RUN apt-get install -y \
-    awscli \
-    openssh-client \
-    hydra \
-    git \
-    gcc \
-    file \
-    openjdk-11-jre
+    python3-venv 
 
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
