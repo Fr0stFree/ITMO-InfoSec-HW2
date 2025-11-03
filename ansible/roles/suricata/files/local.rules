@@ -33,3 +33,35 @@ alert http any any -> $HOME_NET 3000 (msg:"[IDS] SQLi comment detected"; flow:to
 
 # Блокировка SQLi на endpoint /rest/user/login
 drop http any any -> $HOME_NET 3000 (msg:"[IPS] SQLi blocked on login"; flow:to_server,established; http.uri; content:"/rest/user/login"; http.method; content:"POST"; http.request_body; pcre:"/or\s+1\s*=\s*1|union\s+select/i"; sid:4503101; rev:1;)
+
+# A04:2021 Insecure Design
+
+# Массовые попытки логина (5 за 10 сек)
+alert http any any -> $HOME_NET 3000 (msg:"[IDS] Login brute-force detected"; flow:to_server,established; http.uri; content:"/rest/user/login"; http.method; content:"POST"; threshold:type both, track by_src, count 5, seconds 10; classtype:attempted-recon; sid:4504001; rev:1;)
+
+# Агрессивный brute-force (10+ за 30 сек)
+alert http any any -> $HOME_NET 3000 (msg:"[IDS] Aggressive login brute-force"; flow:to_server,established; http.uri; content:"/rest/user/login"; http.method; content:"POST"; threshold:type both, track by_src, count 10, seconds 30; classtype:attempted-recon; sid:4504002; rev:1;)
+
+# Блокировка после 5 попыток за 10 секунд
+drop http any any -> $HOME_NET 3000 (msg:"[IPS] Login brute-force blocked"; flow:to_server,established; http.uri; content:"/rest/user/login"; http.method; content:"POST"; threshold:type both, track by_src, count 5, seconds 10; sid:4504101; rev:1;)
+
+
+# A05:2021 Security Misconfiguration
+
+# Poison Null Byte в URI
+alert http any any -> $HOME_NET 3000 (msg:"[IDS] Poison Null Byte detected"; flow:to_server,established; http.uri; pcre:"/%00|%2500/i"; classtype:web-application-attack; sid:4505001; rev:1;)
+
+# Доступ к FTP-директории
+alert http any any -> $HOME_NET 3000 (msg:"[IDS] FTP directory access"; flow:to_server,established; http.uri; content:"/ftp/"; classtype:policy-violation; sid:4505002; rev:1;)
+
+# Доступ к backup-файлам
+alert http any any -> $HOME_NET 3000 (msg:"[IDS] Backup file access"; flow:to_server,established; http.uri; pcre:"/\.bak(\?|$|#)/i"; classtype:policy-violation; sid:4505003; rev:1;)
+
+# Доступ к metrics endpoint
+alert http any any -> $HOME_NET 3000 (msg:"[IDS] Metrics endpoint access"; flow:to_server,established; http.uri; content:"/metrics"; classtype:policy-violation; sid:4505004; rev:1;)
+
+# Доступ к Security Questions API
+alert http any any -> $HOME_NET 3000 (msg:"[IDS] Security Questions API access"; flow:to_server,established; http.uri; content:"/api/SecurityQuestions"; classtype:policy-violation; sid:4505005; rev:1;)
+
+# Доступ к Score Board
+alert http any any -> $HOME_NET 3000 (msg:"[IDS] Score Board access"; flow:to_server,established; http.uri; content:"/score-board"; classtype:policy-violation; sid:4505006; rev:1;)

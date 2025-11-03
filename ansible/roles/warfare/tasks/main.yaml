@@ -17,3 +17,20 @@
 - name: Show results
   ansible.builtin.debug:
     var: output
+
+- name: Upload scripts
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: /home/{{ username }}/{{ item }}
+    owner: "{{ username }}"
+    mode: "0644"
+  loop: "{{ scripts }}"
+
+- name: Copy scripts to attacker container
+  community.docker.docker_container_copy_into:
+    container: attacker
+    path: /home/{{ username }}/{{ item }}
+    container_path: /opt/{{ item }}
+    mode: "0755"
+    mode_parse: modern
+  loop: "{{ scripts }}"

