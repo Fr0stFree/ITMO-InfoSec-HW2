@@ -93,3 +93,8 @@ alert http any any -> $HOME_NET 3000 (msg:"[IDS] XSS iframe injection detected";
 
 # XSS: img tag with onerror
 alert http any any -> $HOME_NET 3000 (msg:"[IDS] XSS img onerror detected"; flow:to_server,established; http.uri; content:"<img"; nocase; content:"onerror"; nocase; within:100; classtype:web-application-attack; sid:4508005; rev:1;)
+
+# A09:2021 Security Logging and Monitoring Failures
+
+# Блокировка доступа к логам
+drop http any any -> $HOME_NET 3000 (msg:"[IPS] Log access blocked"; flow:to_server,established; http.uri; content:"/support/logs"; classtype:attempted-recon; sid:4509101; rev:1;)
