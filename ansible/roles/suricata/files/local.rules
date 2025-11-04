@@ -65,3 +65,15 @@ alert http any any -> $HOME_NET 3000 (msg:"[IDS] Security Questions API access";
 
 # Доступ к Score Board
 alert http any any -> $HOME_NET 3000 (msg:"[IDS] Score Board access"; flow:to_server,established; http.uri; content:"/score-board"; classtype:policy-violation; sid:4505006; rev:1;)
+
+
+# A06:2021 Vulnerable Components
+
+# Провоцирование stack trace для fingerprinting
+alert http any any -> $HOME_NET 3000 (msg:"[IDS] Error page fingerprinting attempt"; flow:to_server,established; http.uri; pcre:"/\.(txt|exe|dll|jsp|asp|aspx|php|py)$/i"; classtype:attempted-recon; sid:4506001; rev:1;)
+
+# Массовые запросы несуществующих файлов (fingerprinting scan)
+alert http any any -> $HOME_NET 3000 (msg:"[IDS] Component version scan"; flow:to_server,established; http.stat_code; content:"404"; threshold:type both, track by_src, count 10, seconds 10; classtype:attempted-recon; sid:4506002; rev:1;)
+
+# Попытки доступа к конфигам для определения зависимостей
+alert http any any -> $HOME_NET 3000 (msg:"[IDS] Dependency config access"; flow:to_server,established; http.uri; pcre:"/(package\.json|composer\.json|requirements\.txt|pom\.xml|build\.gradle)/i"; classtype:attempted-recon; sid:4506003; rev:1;)

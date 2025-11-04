@@ -96,3 +96,9 @@ curl victim:3000/metrics
 curl victim:3000/api/SecurityQuestions | jq
 curl victim:3000/score-board
 ```
+
+### A06:2021 Vulnerable Components
+
+```bash
+curl victim:3000/ftp/nonexistent.txt
+```

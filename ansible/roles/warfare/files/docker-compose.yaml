@@ -24,6 +24,7 @@ services:
     image: bkimminich/juice-shop:latest
     container_name: victim-juice-shop
     hostname: victim-juice-shop
+    restart: unless-stopped
     networks:
       vulnnet:
         ipv4_address: 172.20.0.106
