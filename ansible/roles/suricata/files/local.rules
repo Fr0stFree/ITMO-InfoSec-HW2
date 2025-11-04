@@ -98,3 +98,16 @@ alert http any any -> $HOME_NET 3000 (msg:"[IDS] XSS img onerror detected"; flow
 
 # Блокировка доступа к логам
 drop http any any -> $HOME_NET 3000 (msg:"[IPS] Log access blocked"; flow:to_server,established; http.uri; content:"/support/logs"; classtype:attempted-recon; sid:4509101; rev:1;)
+
+# A10:2021 Server-Side Request Forgery - SSRF
+# Блокировка SSRF к AWS metadata
+drop http any any -> $HOME_NET 3000 (msg:"[IPS] SSRF AWS metadata blocked"; flow:to_server,established; http.request_body; content:"169.254.169.254"; classtype:web-application-attack; sid:4510101; rev:1;)
+
+# Блокировка SSRF к localhost
+drop http any any -> $HOME_NET 3000 (msg:"[IPS] SSRF localhost blocked"; flow:to_server,established; http.request_body; pcre:"/(localhost|127\\.0\\.0\\.1|0\\.0\\.0\\.0)/"; classtype:web-application-attack; sid:4510102; rev:1;)
+
+# Блокировка SSRF к internal IP
+drop http any any -> $HOME_NET 3000 (msg:"[IPS] SSRF internal IP blocked"; flow:to_server,established; http.request_body; pcre:"/(10\\.|172\\.(1[6-9]|2[0-9]|3[0-1])\\.|192\\.168\\.)/"; classtype:web-application-attack; sid:4510103; rev:1;)
+
+# Блокировка file:// protocol
+drop http any any -> $HOME_NET 3000 (msg:"[IPS] SSRF file protocol blocked"; flow:to_server,established; http.request_body; content:"file://"; nocase; classtype:web-application-attack; sid:4510104; rev:1;)

