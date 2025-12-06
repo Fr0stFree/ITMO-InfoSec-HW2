@@ -2,11 +2,9 @@
 
 set -euo pipefail
 
-
 CURRENT_DIR="$(dirname "$(readlink -f "$0")")"
 CURRENT_FILE="$(readlink -f "$0")"
-LOG_FILE_PATH="$CURRENT_DIR/test.log"
-# LOG_FILE_PATH="/var/log/suricata/update_rules.log"
+LOG_FILE_PATH="${1:-/var/log/suricata/update_rules.log}"
 
 echo "[$(date -Iseconds)] === Starting Suricata rules update ===" | tee -a $LOG_FILE_PATH
 
