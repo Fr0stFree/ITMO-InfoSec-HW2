@@ -1,4 +1,11 @@
 ---
+- name: install dependencies
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - make
+
 - name: Upload required scripts
   loop: 
     - fetch_feeds.sh
@@ -7,5 +14,7 @@
     - update_rules.sh
   ansible.builtin.copy:
     src: "{{ item }}"
-    dest: "/opt/{{ item }}"
+    dest: "/home/{{ username }}/{{ item }}"
     mode: "0755"
+    owner: "{{ username }}"
+    group: "{{ username }}"
