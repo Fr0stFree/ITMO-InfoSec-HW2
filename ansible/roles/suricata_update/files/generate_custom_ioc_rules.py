@@ -3,8 +3,8 @@ from datetime import datetime
 from typing import NamedTuple
 
 DIR_PATH = Path(__file__).parent
-SURICATA_CONFIG_PATH = DIR_PATH / "config.yaml"
-RULES_OUTPUT_PATH = DIR_PATH / "custom_ioc.rules"
+SURICATA_CONFIG_PATH = Path("/etc") / "suricata" / "suricata.yaml"
+RULES_OUTPUT_PATH = Path("/etc") / "suricata" / "rules" / "custom_ioc.rules"
 
 
 class Source(NamedTuple):

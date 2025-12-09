@@ -1,6 +1,0 @@
-dockerfiles:
-  - Dockerfile.attacker
-  - docker-compose.yaml
-
-scripts:
-  - brute_force.py
