@@ -1,0 +1,11 @@
+---
+- name: Upload required scripts
+  loop: 
+    - fetch_feeds.sh
+    - generate_custom_ioc_rules.py
+    - Makefile
+    - update_rules.sh
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "/opt/{{ item }}"
+    mode: "0755"

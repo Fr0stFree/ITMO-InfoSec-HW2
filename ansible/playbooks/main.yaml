@@ -10,6 +10,6 @@
     - docker
     - suricata
     - evebox
-    - warfare
+    - suricata_update
   vars:
     username: yc-user

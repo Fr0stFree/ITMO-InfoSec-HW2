@@ -3,6 +3,7 @@
   ansible.builtin.apt:
     name: "{{ item }}"
     state: present
+    update_cache: yes
   loop:
     - apt-transport-https
     - ca-certificates
